@@ -11,7 +11,7 @@ def soa_formatter(service_name: str, content: str) -> str | None:
     padding_length = 5 - len(str(payload_length))
     padding = ""
 
-    for _ in range(payload_length):
+    for _ in range(padding_length):
         padding += "0"
     
     formatted_response = padding + str(payload_length) + service + content
