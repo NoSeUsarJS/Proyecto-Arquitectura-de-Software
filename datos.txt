@@ -1,0 +1,45 @@
+cree 2 tablas para probar la bdd 
+tabla 1: sales:
+-date guarda la fecha
+product:Damos
+quantity: Damos 
+price: Damos 
+
+tabla 2: inventory:
+-Product
+-stock
+
+
+-- Crear la tabla sales
+CREATE TABLE sales (
+    id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    product VARCHAR(255) NOT NULL,
+    quantity INTEGER NOT NULL,
+    price NUMERIC(10, 2) NOT NULL
+);
+
+-- Crear la tabla inventory
+CREATE TABLE inventory (
+    id SERIAL PRIMARY KEY,
+    product VARCHAR(255) NOT NULL,
+    stock INTEGER NOT NULL
+);
+
+-- Insertar datos de prueba en la tabla sales
+INSERT INTO sales (date, product, quantity, price) VALUES 
+('2024-06-01', 'Product A', 10, 100.00),
+('2024-06-02', 'Product B', 5, 150.00),
+('2024-06-03', 'Product A', 20, 200.00);
+
+-- Insertar datos de prueba en la tabla inventory
+INSERT INTO inventory (product, stock) VALUES 
+('Product A', 50),
+('Product B', 30);
+
+
+-- Verificar datos en la tabla sales
+SELECT * FROM sales;
+
+-- Verificar datos en la tabla inventory
+SELECT * FROM inventory;
