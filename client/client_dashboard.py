@@ -7,12 +7,15 @@ import base64
 
 # Función para mostrar la gráfica de ventas
 def display_sales_chart(image_base64):
-    image_data = base64.b64decode(image_base64)
-    plt.figure(figsize=(10, 6))
-    img = plt.imread(BytesIO(image_data))
-    plt.imshow(img)
-    plt.axis('off')
-    plt.show()
+    if image_base64:
+        image_data = base64.b64decode(image_base64)
+        plt.figure(figsize=(10, 6))
+        img = plt.imread(BytesIO(image_data))
+        plt.imshow(img)
+        plt.axis('off')
+        plt.show()
+    else:
+        print("No sales data available for today.")
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -46,21 +49,33 @@ try:
             data += packet
         
         print("Received raw data: {!r}".format(data))  # Declaración de depuración
-        response = json.loads(data.decode())
+        data_str = data.decode()
+
+        # Procesar el prefijo y extraer el JSON
+        if data_str.startswith("SV003OK"):
+            data_str = data_str[7:]
+
+        response = json.loads(data_str)
         print('Received data: {}'.format(response))
 
         # Mostrar gráfica de ventas del día
-        display_sales_chart(response['sales_chart'])
+        if 'sales_chart' in response:
+            display_sales_chart(response['sales_chart'])
 
         # Mostrar porcentaje de productos vendidos
-        print("\nPorcentaje de Productos Vendidos:")
-        for product, percentage in response['product_percentage'].items():
-            print(f"{product}: {percentage:.2f}%")
+        if 'product_percentage' in response:
+            print("\nPorcentaje de Productos Vendidos:")
+            for product, percentage in response['product_percentage'].items():
+                print(f"{product}: {percentage:.2f}%")
 
         # Mostrar inventario
-        print("\nInventario de Productos:")
-        for product, stock in response['inventory_data'].items():
-            print(f"{product}: {stock} en stock")
+        if 'inventory_data' in response:
+            print("\nInventario de Productos:")
+            for product, stock in response['inventory_data'].items():
+                print(f"{product}: {stock} en stock")
+
+        if 'error' in response:
+            print(f"Error: {response['error']}")
 
 finally:
     print('Closing socket')

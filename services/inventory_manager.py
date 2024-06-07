@@ -1,29 +1,30 @@
-import pandas as pd
-import psycopg2
-from common.services import Service
 import json
+import psycopg2
+import pandas as pd
+from common.services import Service
 
-# Configuración del servicio
-SERVICE_NAME = "inventory_manager"
-host, port = "soabus", 5001 
-service = Service(SERVICE_NAME, host, port)
-
-# Configuración de PostgreSQL
+# Configuración de la base de datos
 db_config = {
-    'dbname': 'mydatabase',
-    'user': 'myuser',
-    'password': 'mypassword',
-    'host': 'postgres_db'
+    "host": "localhost",
+    "database": "mydatabase",
+    "user": "myuser",
+    "password": "mypassword"
 }
 
-# Función para obtener la conexión a la base de datos
+# Función para conectar a la base de datos
 def get_db_connection():
-    conn = psycopg2.connect(**db_config)
-    return conn
+    try:
+        conn = psycopg2.connect(**db_config)
+        return conn
+    except Exception as e:
+        print(f"Error al conectar a la base de datos: {e}")
+        return None
 
 # Función para agregar ingrediente
 def add_ingredient(data):
     conn = get_db_connection()
+    if conn is None:
+        return "Error al conectar a la base de datos"
     cursor = conn.cursor()
     query = """
     INSERT INTO inventory (product, stock) VALUES (%s, %s)
@@ -37,6 +38,8 @@ def add_ingredient(data):
 # Función para eliminar ingrediente
 def delete_ingredient(data):
     conn = get_db_connection()
+    if conn is None:
+        return "Error al conectar a la base de datos"
     cursor = conn.cursor()
     query = """
     DELETE FROM inventory WHERE product = %s
@@ -50,6 +53,8 @@ def delete_ingredient(data):
 # Función para editar ingrediente
 def edit_ingredient(data):
     conn = get_db_connection()
+    if conn is None:
+        return "Error al conectar a la base de datos"
     cursor = conn.cursor()
     query = """
     UPDATE inventory SET stock = %s WHERE product = %s
@@ -63,6 +68,8 @@ def edit_ingredient(data):
 # Función para ver ingredientes
 def view_ingredients():
     conn = get_db_connection()
+    if conn is None:
+        return "Error al conectar a la base de datos"
     query = """
     SELECT product, stock FROM inventory;
     """
@@ -86,6 +93,9 @@ def handle_inventory_request(data: str) -> str:
     else:
         response = "Acción no válida."
 
+    print("Sending response:", response)  # Añadido para depuración
     return str(json.dumps(response))
 
-service.run_service(handle_inventory_request)
+# Inicializar y ejecutar el servicio
+inventory_service = Service(service_name="inventory_manager", host="localhost", port=5001)
+inventory_service.run_service(handle_inventory_request)

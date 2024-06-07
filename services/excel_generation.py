@@ -3,10 +3,11 @@ import psycopg2
 from common.services import Service
 import json
 from datetime import datetime
+import os
 
 # Configuración del servicio
 SERVICE_NAME = "generate_excel"
-host, port = "soabus", 5001  # Conectar con el bus de servicios en el puerto 5000
+host, port = "localhost", 5001  # Conectar con el bus de servicios en el puerto 5001
 service = Service(SERVICE_NAME, host, port)
 
 # Configuración de PostgreSQL
@@ -14,11 +15,12 @@ db_config = {
     'dbname': 'mydatabase',
     'user': 'myuser',
     'password': 'mypassword',
-    'host': 'postgres_db'
+    'host': 'localhost'  # Cambia 'postgres_db' a 'localhost'
 }
 
 # Función para obtener la conexión a la base de datos
 def get_db_connection():
+    print("Connecting to database with config:", db_config)  # Añadido para depuración
     conn = psycopg2.connect(**db_config)
     return conn
 
@@ -44,6 +46,10 @@ def get_inventory_data():
     conn.close()
     return df
 
+# Función para obtener la ruta del escritorio
+def get_desktop_path():
+    return os.path.join(os.path.expanduser("~"), "Desktop")
+
 # Función para generar el reporte en Excel
 def generate_excel_report(sales_df, inventory_df, filename='sales_report.xlsx'):
     sales_df['date'] = pd.to_datetime(sales_df['date'])
@@ -58,10 +64,12 @@ def generate_excel_report(sales_df, inventory_df, filename='sales_report.xlsx'):
 
     # Productos más vendidos
     productos_mas_vendidos = sales_df.groupby('product').agg({'quantity': 'sum'}).reset_index().sort_values(by='quantity', ascending=False)
-    producto_mas_vendido = productos_mas_vendidos.iloc[0]
+    producto_mas_vendido = productos_mas_vendidos.iloc[0] if not productos_mas_vendidos.empty else {}
 
     # Generar el archivo Excel con todas las pestañas
-    with pd.ExcelWriter(filename) as writer:
+    desktop_path = get_desktop_path()
+    full_path = os.path.join(desktop_path, filename)
+    with pd.ExcelWriter(full_path) as writer:
         ventas_diarias.to_excel(writer, sheet_name='Ventas Diarias', index=False)
         ventas_semanales.to_excel(writer, sheet_name='Ventas Semanales', index=False)
         ventas_mensuales.to_excel(writer, sheet_name='Ventas Mensuales', index=False)
@@ -73,10 +81,11 @@ def generate_excel_report(sales_df, inventory_df, filename='sales_report.xlsx'):
         total_sales_df.to_excel(writer, sheet_name='Total Ventas', index=False)
 
         # Agregar la hoja del producto más vendido
-        producto_mas_vendido_df = pd.DataFrame(producto_mas_vendido).transpose()
-        producto_mas_vendido_df.to_excel(writer, sheet_name='Producto Más Vendido', index=False)
+        if not producto_mas_vendido.empty:
+            producto_mas_vendido_df = pd.DataFrame(producto_mas_vendido).transpose()
+            producto_mas_vendido_df.to_excel(writer, sheet_name='Producto Más Vendido', index=False)
 
-    print(f"Reporte generado: {filename}")
+    print(f"Reporte generado: {full_path}")
 
 # Función para manejar la solicitud de generación de reporte
 def generate_report(data: str) -> str:
