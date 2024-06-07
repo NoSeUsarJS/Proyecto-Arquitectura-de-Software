@@ -1,5 +1,6 @@
 import socket
-import sys
+from common.soa_formatter import soa_formatter
+import json
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -17,7 +18,8 @@ try:
         if user_input != 'y':
             break
         
-        message = b'00016serviHello world'
+        data = {"food": "pollo con papas fritas", "price": 7000}
+        message = soa_formatter("create_order_manager", json.dumps(data)).encode()
         print('Sending {!r}'.format(message))
         sock.sendall(message)
 
