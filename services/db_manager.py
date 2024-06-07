@@ -44,6 +44,150 @@ class DatabaseServer:
             )
         except psycopg2.Error as e:
             print(f"Error al conectar a la base de datos: {e}")
+    def create_user(self, nombre,rut,rol,password):
+        try:
+            query = f"INSERT INTO persona (nombre, rut, rol, password) VALUES ({nombre},{rut},{rol},{password})"
+            auth = self.execute_query(query)
+            if auth:
+                print("Se ha creado el usuario")
+                return 'True'
+            else:
+                return 'Wrong'
+        except Exception as e:
+            return 'False'
+        
+    def login(self, nombre, password):
+        try:
+            query = f"SELECT * FROM persona WHERE nombre = '{nombre}' AND password = '{password}'"
+            auth = self.execute_query(query)
+            if auth:
+                print(auth)
+                return 'True'
+            else:
+                print(auth)
+                return 'Wrong'
+        except Exception as e:
+            return 'False'
+        
+    def borrar_user(self, ID):
+        try:
+            query = f"DELETE FROM persona WHERE id = '{ID}' "
+            auth = self.execute_query(query)
+            if auth:
+                print("Borre, con exito al usuario con el ID: ",ID)
+                return 'True'
+            else:
+                print(auth)
+                return 'Wrong'
+        except Exception as e:
+            return 'False'
+        
+    def ver_personal(self):
+        try:
+            query = f"SELECT * FROM persona"
+            auth = self.execute_query(query)
+            if auth:
+                print(auth)
+                return 'True'
+            else:
+                print(auth)
+                return 'Wrong'
+        except Exception as e:
+            return 'False'
+    def create_mesa(self,numero,cantidad):
+        try:
+            query = f"INSERT INTO mesa (mesa, numero_personas) VALUES ({numero},{cantidad})"
+            auth = self.execute_query(query)
+            if auth:
+                print("Se ha creado la mesa")
+                return 'True'
+            else:
+                return 'Wrong'
+        except Exception as e:
+            return 'False'
+    def ver_mesas(self):
+        try:
+            query = f"SELECT * FROM mesa"
+            auth = self.execute_query(query)
+            if auth:
+                print(auth)
+                return 'True'
+            else:
+                print(auth)
+                return 'Wrong'
+        except Exception as e:
+            return 'False'
+    def actualizar_mesa(self,numero,cantidad):
+        try:
+            query = f"UPDATE mesa SET numero_personas = {cantidad} WHERE mesa = {numero}"
+            auth = self.execute_query(query)
+            if auth:
+                print("Se ha creado la mesa")
+                return 'True'
+            else:
+                return 'Wrong'
+        except Exception as e:
+            return 'False'
+    def borrar_mesa(self,numero):
+        try:
+            query = f"DELETE FROM mesa WHERE mesa = {numero} "
+            auth = self.execute_query(query)
+            if auth:
+                print("Se ha borrado la mesa")
+                return 'True'
+            else:
+                return 'Wrong'
+        except Exception as e:
+            return 'False'
+    
+    def ver_ingredientes(self):
+        try:
+            query = f"SELECT * FROM ingredientes"
+            auth = self.execute_query(query)
+            if auth:
+                print(auth)
+                return 'True'
+            else:
+                return 'Wrong'
+        except Exception as e:
+            return 'False'
+
+    def crear_ingrediente(self, nombre,cantidad):
+        try:
+            query = f"INSERT INTO ingredientes ( nombre, cantidad_ingredientes) VALUES ({nombre},{cantidad})"
+            auth = self.execute_query(query)
+            if auth:
+                print("Se ha creado el ingrediente")
+                return 'True'
+            else:
+                return 'Wrong'
+        except Exception as e:
+            return 'False'
+        
+    def actualizar_ingrediente(self,numero,cantidad):
+        try:
+            query = f"UPDATE ingredientes SET cantidad_ingredientes = {cantidad} WHERE id_ingrediente = {numero}"
+            auth = self.execute_query(query)
+            if auth:
+                print("Se ha creado la mesa")
+                return 'True'
+            else:
+                return 'Wrong'
+        except Exception as e:
+            return 'False'
+        
+    def borrar_ingrediente(self,numero):
+        try:
+            query = f"DELETE FROM ingredientes WHERE id_ingrediente = {numero} "
+            auth = self.execute_query(query)
+            if auth:
+                print("Se ha borrado la el ingrediente")
+                return 'True'
+            else:
+                return 'Wrong'
+        except Exception as e:
+            return 'False'
+
 
 
     def execute_query(self, query, params=None):
@@ -151,3 +295,27 @@ server = DatabaseServer(host='localhost', port='5432', dbname='mydatabase', user
 
 server.create_connection()
 server.create_tables()
+
+#server.create_user("'diego'","'26843998-6'","false","'mi_password_secreto'") #Sirve para agregar {Nombre} {RUT} {true o false} {password} del cliente
+
+#server.login("diego","mi_password_secreto") # Sirve muestra la matriz retornar true para el login ? q lo envie de vuelta al servicio
+#server.login("iego","mi_password_secreto") # muestra el resultado q es vacio
+#server.create_user("'A'","'25678974-6'","true","'mi_password_secreto'")
+#server.ver_personal() # devuelve matriz de matriz de personas
+#server.borrar_user(2)
+#server.ver_personal()
+
+#server.create_mesa(1,4)
+#server.ver_mesas()
+#server.actualizar_mesa(1,2)
+#server.ver_mesas()
+#server.borrar_mesa(1)
+#server.ver_mesas()
+
+#server.crear_ingrediente("'Arroz'",50)
+#server.ver_ingredientes()
+#server.actualizar_ingrediente(1,10)
+#server.ver_ingredientes()
+#server.borrar_ingrediente(1)
+#server.ver_ingredientes()
+
