@@ -43,30 +43,30 @@ def handle_inventory_request(data: str) -> str:
     
     if action == "1":
         nombre = data.get('nombre')
-        tiempo = data.get('tiempo')
-        precio = data.get('precio')
-        descripcion = data.get('descripcion')
+        rut = data.get('rut')
+        rol = data.get('rol')
+        password = data.get('password')
         print("Agregando persona...")
-        query = f"INSERT INTO platillo (nombre_platillo, tiempo_medio_espera, precio, descripcion) VALUES ('{nombre}','{tiempo}',{precio},'{descripcion}')"
+        query = f"INSERT INTO persona (nombre, rut, rol, password) VALUES ('{nombre}','{rut}',{rol},'{password}')"
         Enviar(query)
-        response = "Platillo añadido"
+        response = "Persona añadida"
 
     elif action == "2":
-        nombre = data.get('nombre')
-        tiempo = data.get('tiempo')
+        rut = data.get('rut')
+        rol = data.get('rol')
         print("Actualizando persona...")
-        query = f"UPDATE platillo SET tiempo medio = {tiempo} WHERE nombre_platillo = '{nombre}'"
+        query = f"UPDATE persona SET rol = {rol} WHERE rut = '{rut}'"
         Enviar(query)
-        response = "Platillo actualizado"
+        response = "Persona actualizada"
 
     elif action == "3":
-        nombre = data.get('nombre')
-        query = f"DELETE FROM platillo WHERE nombre_platillo = '{nombre}' "
+        rut = data.get('rut')
+        query = f"DELETE FROM persona WHERE rut = '{rut}' "
         Enviar(query)
-        response = "Platillo eliminado"
+        response = "Persona eliminada"
 
     elif action == "4":
-        query = f"SELECT * FROM platillo"
+        query = f"SELECT * FROM persona"
         response = Enviar(query)
         
         
@@ -75,11 +75,11 @@ def handle_inventory_request(data: str) -> str:
         for i in range(len(matriz)):
             id = matriz[i][0]
             nombre = matriz[i][1]
-            tiempo = matriz[i][2]
-            precio = matriz [i][3]
-            descripcion = matriz[i][4]
+            rut = matriz[i][2]
+            rol = matriz [i][3]
+            password = matriz[i][4]
 
-            lista.append(f" id: {id} - nombre: {nombre} - tiempo medio: {tiempo} - precio: {precio} - descripcion: {descripcion}")
+            lista.append(f" id: {id} - nombre: {nombre} - rut: {rut} - rol: {rol} - password: {password}")
         response = json.dumps(lista)
     else:
         response = "Acción no válida."
@@ -89,5 +89,5 @@ def handle_inventory_request(data: str) -> str:
     return response 
 # "db_manager": "SV005",
 # Inicializar y ejecutar el servicio
-inventory_service = Service(service_name="meal_manager", host="localhost", port=5001)
+inventory_service = Service(service_name="account_manager", host="localhost", port=5001)
 inventory_service.run_service(handle_inventory_request)

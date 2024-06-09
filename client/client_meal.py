@@ -3,20 +3,21 @@ import json
 from common.soa_formatter import soa_formatter
 import ast
 
+
 def add_client():
     server_address = ('localhost', 5001)
     print('Connecting to {} port {}'.format(*server_address))
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(server_address)
     try:
-        nombre = input("Ingrese el nombre: ")
-        rut = input("Ingrese el rut: ")
-        rol = input("Ingrese el rol admin (true) o garzon (false): ")
-        password =input("Ingrese la contraseña: ")
-        data = {"action": "1", "nombre": nombre, "rut": rut, "rol": rol, "password": password}
+        nombre = input("Ingrese el nombre del platillo: ")
+        tiempo = input("Ingrese el tiempo medio de espera: ")
+        precio = input("Ingrese el precio: ")
+        descripcion =input("Ingrese la descripcion del platillo: ")
+        data = {"action": "1", "nombre": nombre, "tiempo": tiempo, "precio": precio, "descripcion": descripcion}
         
         #No tocar
-        message = soa_formatter("account_manager", json.dumps(data))
+        message = soa_formatter("meal_manager", json.dumps(data))
         sock.sendall(message)
 
         amount_received = 0
@@ -45,12 +46,12 @@ def edit_client():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(server_address)
     try:
-        rut =input("ingrese el rut de la persona a cambiar el rol: ")
-        rol = input("Ingrese el rol admin (true) o garzon (false) a cambiar: ")
-        data = {"action": "2", "rut": rut, "rol": rol}
+        nombre =input("ingrese el platillo a modificar: ")
+        tiempo = input("Ingrese el tiempo medio nuevo: ")
+        data = {"action": "2", "nombre": nombre, "tiempo": tiempo}
         
         #No tocar
-        message = soa_formatter("account_manager", json.dumps(data))
+        message = soa_formatter("meal_manager", json.dumps(data))
         sock.sendall(message)
 
         amount_received = 0
@@ -78,11 +79,11 @@ def delete_client():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(server_address)
     try:
-        rut = input("Ingrese el rut del usuario a borrar: ")
-        data = {"action": "3", "rut": rut}
+        nombre = input("Ingrese el nombre del platillo: ")
+        data = {"action": "3", "nombre": nombre}
         
         #No tocar
-        message = soa_formatter("account_manager", json.dumps(data))
+        message = soa_formatter("meal_manager", json.dumps(data))
         sock.sendall(message)
 
         amount_received = 0
@@ -113,7 +114,7 @@ def watch_client():
         data = {"action": "4"}
         
         #No tocar
-        message = soa_formatter("account_manager", json.dumps(data))
+        message = soa_formatter("meal_manager", json.dumps(data))
         sock.sendall(message)
 
         amount_received = 0
@@ -142,10 +143,10 @@ def watch_client():
 def main():
     while True:
         print("\nMain Menu:")
-        print("1. Add user")
-        print("2. Edit user")
-        print("3. Delete user")
-        print("4. Watch user")
+        print("1. Add meal")
+        print("2. Edit meal")
+        print("3. Delete meal")
+        print("4. Watch meals")
         print("5. Exit")
 
         choice = input("Select an option: ")
@@ -166,4 +167,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-#"account_manager": "SV009"
+#"meal_manager": "SV009"

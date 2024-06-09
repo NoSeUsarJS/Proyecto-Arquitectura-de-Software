@@ -91,7 +91,7 @@ class DatabaseServer:
             CREATE TABLE IF NOT EXISTS platillo (
                 id_platillo SERIAL PRIMARY KEY,
                 Nombre_platillo VARCHAR(255),
-                Tiempo_medio_espera TIME,
+                Tiempo_medio_espera VARCHAR(255),
                 Precio INT,
                 Descripcion TEXT
             )
