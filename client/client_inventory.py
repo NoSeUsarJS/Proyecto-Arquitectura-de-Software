@@ -1,15 +1,20 @@
 import socket
-from common.soa_formatter import soa_formatter
 import json
-import pandas as pd
+from common.soa_formatter import soa_formatter
+import ast
 
-# Función para enviar solicitud al servicio
-def send_request(data):
+
+def add_client():
+    server_address = ('localhost', 5001)
+    print('Connecting to {} port {}'.format(*server_address))
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_address = ('localhost', 5001)  # Cambia esto al puerto del bus de servicios
     sock.connect(server_address)
-    
     try:
+        nombre = input("Ingrese ingrediente: ")
+        cantidad = input("Ingrese cantidad del ingrediente: ")
+        data = {"action": "1", "nombre": nombre, "cantidad": cantidad}
+        
+        #No tocar
         message = soa_formatter("inventory_manager", json.dumps(data))
         sock.sendall(message)
 
@@ -22,56 +27,140 @@ def send_request(data):
             amount_received += len(packet)
             data += packet
         
-        print("Received raw data:", data)  # Añadido para depuración
-
-        # Procesar el prefijo y extraer el JSON
-        data_str = data.decode()
-        if data_str.startswith("SV001OK"):
-            data_str = data_str[7:]
+        print("Received raw data:", data)
+        # Agregar manejo de errores
         
-        response = json.loads(data_str)
-        return response
+        return True
+                    
     finally:
+        print('Closing socket')
         sock.close()
+        print(data.decode()[7:])
 
-# Función para mostrar menú y realizar acciones
-def menu():
+def edit_client():
+
+    server_address = ('localhost', 5001)
+    print('Connecting to {} port {}'.format(*server_address))
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(server_address)
+    try:
+        nombre =input("ingrese el ingrediente: ")
+        cantidad = input("Ingrese cantidad: ")
+        data = {"action": "2", "nombre": nombre, "cantidad": cantidad}
+        
+        #No tocar
+        message = soa_formatter("inventory_manager", json.dumps(data))
+        sock.sendall(message)
+
+        amount_received = 0
+        amount_expected = int(sock.recv(5))
+        data = b''
+
+        while amount_received < amount_expected:
+            packet = sock.recv(amount_expected - amount_received)
+            amount_received += len(packet)
+            data += packet
+        
+        print("Received raw data:", data)
+        # Agregar manejo de errores
+        
+        return True
+                    
+    finally:
+        print('Closing socket')
+        sock.close()
+        print(data.decode()[7:])
+
+def delete_client():
+    server_address = ('localhost', 5001)
+    print('Connecting to {} port {}'.format(*server_address))
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(server_address)
+    try:
+        nombre = input("Ingrese el nombre del ingrediente: ")
+        data = {"action": "3", "nombre": nombre}
+        
+        #No tocar
+        message = soa_formatter("inventory_manager", json.dumps(data))
+        sock.sendall(message)
+
+        amount_received = 0
+        amount_expected = int(sock.recv(5))
+        data = b''
+
+        while amount_received < amount_expected:
+            packet = sock.recv(amount_expected - amount_received)
+            amount_received += len(packet)
+            data += packet
+        
+        print("Received raw data:", data)
+        # Agregar manejo de errores
+        
+        return True
+                    
+    finally:
+        print('Closing socket')
+        sock.close()
+        print(data.decode()[7:])
+
+def watch_client():
+    server_address = ('localhost', 5001)
+    print('Connecting to {} port {}'.format(*server_address))
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(server_address)
+    try:
+        data = {"action": "4"}
+        
+        #No tocar
+        message = soa_formatter("inventory_manager", json.dumps(data))
+        sock.sendall(message)
+
+        amount_received = 0
+        amount_expected = int(sock.recv(5))
+        data = b''
+
+        while amount_received < amount_expected:
+            packet = sock.recv(amount_expected - amount_received)
+            amount_received += len(packet)
+            data += packet
+        
+        print("Received raw data:", data)
+        # Agregar manejo de errores
+        data1 = f"{json.loads(data.decode()[7:])}" 
+
+        list_of_strings = ast.literal_eval(data1)
+        print(list_of_strings)
+        return True
+                    
+    finally:
+        print('Closing socket')
+        sock.close()
+        for i in range(len(list_of_strings)):
+            print(list_of_strings[i])
+
+def main():
     while True:
-        print("\nMenu:")
-        print("1. Agregar ingrediente")
-        print("2. Eliminar ingrediente")
-        print("3. Editar ingrediente")
-        print("4. Ver ingredientes")
-        print("5. Salir")
+        print("\nMain Menu:")
+        print("1. Add inventory")
+        print("2. Edit inventory")
+        print("3. Delete inventory")
+        print("4. Watch inventory")
+        print("5. Exit")
 
-        choice = input("Selecciona una opción: ")
+        choice = input("Select an option: ")
 
         if choice == "1":
-            product = input("Nombre del ingrediente: ")
-            stock = int(input("Cantidad en stock: "))
-            data = {"action": "add", "product": product, "stock": stock}
+            add_client()
         elif choice == "2":
-            product = input("Nombre del ingrediente a eliminar: ")
-            data = {"action": "delete", "product": product}
+            edit_client()
         elif choice == "3":
-            product = input("Nombre del ingrediente a editar: ")
-            stock = int(input("Nueva cantidad en stock: "))
-            data = {"action": "edit", "product": product, "stock": stock}
+            delete_client()
         elif choice == "4":
-            data = {"action": "view"}
+            watch_client()
         elif choice == "5":
             break
         else:
-            print("Opción no válida.")
-            continue
-
-        response = send_request(data)
-        if choice == "4":
-            # Mostrar los ingredientes como tabla
-            df = pd.DataFrame(response)
-            print(df)
-        else:
-            print(response)
+            print("Invalid option, please try again.")
 
 if __name__ == "__main__":
-    menu()
+    main()

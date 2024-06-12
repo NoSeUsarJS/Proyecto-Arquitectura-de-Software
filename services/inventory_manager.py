@@ -1,101 +1,88 @@
 import json
-import psycopg2
-import pandas as pd
+import socket
 from common.services import Service
+from common.services import soa_formatter
 
-# Configuración de la base de datos
-db_config = {
-    "host": "localhost",
-    "database": "mydatabase",
-    "user": "myuser",
-    "password": "mypassword"
-}
-
-# Función para conectar a la base de datos
-def get_db_connection():
+def Enviar(query):
+    server_address = ('localhost', 5001)
+    print('Connecting to {} port {}'.format(*server_address))
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(server_address)
+    
+    data = {"query": query}
     try:
-        conn = psycopg2.connect(**db_config)
-        return conn
-    except Exception as e:
-        print(f"Error al conectar a la base de datos: {e}")
-        return None
+        message = soa_formatter("db_manager", json.dumps(data))
+        sock.sendall(message)
 
-# Función para agregar ingrediente
-def add_ingredient(data):
-    conn = get_db_connection()
-    if conn is None:
-        return "Error al conectar a la base de datos"
-    cursor = conn.cursor()
-    query = """
-    INSERT INTO inventory (product, stock) VALUES (%s, %s)
-    """
-    cursor.execute(query, (data['product'], data['stock']))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return "Ingrediente agregado."
+        amount_received = 0
+        amount_expected = int(sock.recv(5))
+        data = b''
 
-# Función para eliminar ingrediente
-def delete_ingredient(data):
-    conn = get_db_connection()
-    if conn is None:
-        return "Error al conectar a la base de datos"
-    cursor = conn.cursor()
-    query = """
-    DELETE FROM inventory WHERE product = %s
-    """
-    cursor.execute(query, (data['product'],))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return "Ingrediente eliminado."
+        while amount_received < amount_expected:
+            packet = sock.recv(amount_expected - amount_received)
+            amount_received += len(packet)
+            data += packet
+        
+        print("Received raw data:", data)
+        # Agregar manejo de errores
+        try:
+            
+            return data.decode()[7:]
+        except json.JSONDecodeError:
+            print("Error decoding JSON response.")
 
-# Función para editar ingrediente
-def edit_ingredient(data):
-    conn = get_db_connection()
-    if conn is None:
-        return "Error al conectar a la base de datos"
-    cursor = conn.cursor()
-    query = """
-    UPDATE inventory SET stock = %s WHERE product = %s
-    """
-    cursor.execute(query, (data['stock'], data['product']))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return "Ingrediente editado."
-
-# Función para ver ingredientes
-def view_ingredients():
-    conn = get_db_connection()
-    if conn is None:
-        return "Error al conectar a la base de datos"
-    query = """
-    SELECT product, stock FROM inventory;
-    """
-    df = pd.read_sql_query(query, conn)
-    conn.close()
-    return df.to_dict(orient='records')
+                    
+    finally:
+        print('Closing socket')
+        sock.close()
 
 # Función para manejar la solicitud del inventario
 def handle_inventory_request(data: str) -> str:
     data = json.loads(data)
     action = data.get('action')
     
-    if action == "add":
-        response = add_ingredient(data)
-    elif action == "delete":
-        response = delete_ingredient(data)
-    elif action == "edit":
-        response = edit_ingredient(data)
-    elif action == "view":
-        response = view_ingredients()
+    if action == "1":
+        nombre = data.get('nombre')
+        cantidad = data.get('cantidad')
+        print("Agregando ingredientes...")
+        query = f"INSERT INTO ingredientes ( nombre, cantidad_ingredientes) VALUES ({nombre},{cantidad})"
+        Enviar(query)
+        response = "Ingrediente añadido"
+
+    elif action == "2":
+        nombre = data.get('nombre')
+        cantidad = data.get('cantidad')
+        print("Actualizando Mesa...")
+        query = f"UPDATE ingredientes SET cantidad_ingredientes = {cantidad} WHERE nombre = {nombre}"
+        Enviar(query)
+        response = "Ingredientes actualizados"
+
+    elif action == "3":
+        nombre = data.get('nombre')
+        query = f"DELETE FROM ingredientes WHERE nombre = {nombre} "
+        Enviar(query)
+        response = "Mesa eliminada"
+
+    elif action == "4":
+        query = f"SELECT * FROM ingredientes"
+        response = Enviar(query)
+        
+        
+        matriz = json.loads(response)
+        lista = []
+        for i in range(len(matriz)):
+            id = matriz[i][0]
+            nombre = matriz[i][1]
+            cantidad = matriz[i][2]
+            lista.append(f" Id: {id} - Nombre: {nombre} - Cantidad: {cantidad}")
+        response = json.dumps(lista)
     else:
         response = "Acción no válida."
-
-    print("Sending response:", response)  # Añadido para depuración
-    return str(json.dumps(response))
-
+    
+    print("Sending response:", response) 
+    
+    return response 
+# "db_manager": "SV005",
 # Inicializar y ejecutar el servicio
 inventory_service = Service(service_name="inventory_manager", host="localhost", port=5001)
 inventory_service.run_service(handle_inventory_request)
