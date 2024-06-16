@@ -6,7 +6,8 @@ import client_meal
 import client_inventory
 import client_personal
 import client_pedidos
-
+import client_generar_pedido
+import client_venta
 
 def login_client():
     server_address = ('localhost', 5001)
@@ -66,11 +67,11 @@ def main():
                 elif(valor == "4"):
                     client_meal.main()
                 elif(valor == "5"):
-                    print("Proximamente")
+                    print("Proximamente") #arreglar client_excel y acoplarlo al servicio 
                 elif(valor == "6"):
-                    print("Proximamente")
+                    print("Proximamente") #arreglar client_dashboard y acoplarlo al servicio 
                 elif(valor == "7"):
-                    print("prox")
+                    client_venta.main()
                 elif(valor == "8"):
                     client_pedidos.main()
                 elif(valor == "9"):
@@ -83,12 +84,18 @@ def main():
                 print("1. Ver menu")
                 print("2. Generar Pedido")
                 print("3. Cerrar Pedido")
-                print("4. Generar Cuenta")
+                print("4. Cambiar contraseña")
                 print("5. Cerrar sesion")
 
                 valor = input("Seleccione Cliente: ")
                 if(valor == "1"):
                     client_meal.watch_client()
+                elif(valor == "2"):
+                    client_generar_pedido.main() # Crear servicio?
+                elif(valor == "3"):
+                    client_venta.cerrar_cuenta() #crear todo?
+                elif(valor == "4"):
+                    client_personal.editpass() #Crear en servicio
                 elif(valor == "5"):
                     break
                 else:
