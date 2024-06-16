@@ -1,22 +1,120 @@
 import pandas as pd
-import psycopg2
-from common.services import Service
-import json
 from datetime import datetime
 import os
+import psycopg2
 
-# Configuración del servicio
-SERVICE_NAME = "generate_excel"
-host, port = "localhost", 5001  # Conectar con el bus de servicios en el puerto 5001
-service = Service(SERVICE_NAME, host, port)
+import json
+import socket
+from common.services import Service
+from common.services import soa_formatter
 
-# Configuración de PostgreSQL
-db_config = {
-    'dbname': 'mydatabase',
-    'user': 'myuser',
-    'password': 'mypassword',
-    'host': 'localhost'  # Cambia 'postgres_db' a 'localhost'
-}
+def Enviar(query):
+    server_address = ('localhost', 5001)
+    print('Connecting to {} port {}'.format(*server_address))
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(server_address)
+    
+    data = {"query": query}
+    try:
+        message = soa_formatter("db_manager", json.dumps(data))
+        sock.sendall(message)
+
+        amount_received = 0
+        amount_expected = int(sock.recv(5))
+        data = b''
+
+        while amount_received < amount_expected:
+            packet = sock.recv(amount_expected - amount_received)
+            amount_received += len(packet)
+            data += packet
+        
+        print("Received raw data:", data)
+        # Agregar manejo de errores
+        try:
+            
+            return data.decode()[7:]
+        except json.JSONDecodeError:
+            print("Error decoding JSON response.")
+
+                    
+    finally:
+        print('Closing socket')
+        sock.close()
+
+# Función para manejar la solicitud del inventario
+def handle_inventory_request(data: str) -> str:
+    data = json.loads(data)
+    action = data.get('action')
+    
+    if action == "1":
+        print("Generando Excel de comidas...")
+        query = f"SELECT * FROM platillo"
+        response = Enviar(query)
+        matriz = json.loads(response)
+        
+        for i in range(len(matriz)):
+            id = matriz[i][0]
+            nombre = matriz[i][1]
+            tiempo = matriz[i][2]
+            precio = matriz[i][3]
+            descripcion = matriz[i][4]
+        
+        response = "Excel de comidas generado"
+
+    elif action == "2":
+        print("Generando Excel...")
+        query = f"SELECT * FROM ingredientes"
+        response = Enviar(query)
+        
+        
+        matriz = json.loads(response)
+        
+        for i in range(len(matriz)):
+            id = matriz[i][0]
+            nombre = matriz[i][1]
+            cantidad = matriz[i][2]
+            
+        response = "Excel de ingredientes generado"
+    elif action == "3":
+        print("Generando Excel...")
+        query = f"SELECT * FROM persona"
+        response = Enviar(query)
+        
+        
+        matriz = json.loads(response)
+        
+        for i in range(len(matriz)):
+            id_persona = matriz[i][0]
+            nombre = matriz[i][1]
+            rut = matriz[i][2]
+            rol = matriz[i][3]
+            password = matriz[i][4]
+            
+        response = "Excel de personas generado"
+    elif action == "4":
+        print("Generando Excel...")
+        query = f"SELECT * FROM venta"
+        response = Enviar(query)
+        
+        
+        matriz = json.loads(response)
+        
+        for i in range(len(matriz)):
+            id_venta = matriz[i][0]
+            id_pedido = matriz[i][1]
+            precio_total = matriz[i][2]
+           
+        response = "Excel de ventas generado"
+    else:
+        response = "Acción no válida."
+    
+    print("Sending response:", response) 
+    
+    return response 
+# "db_manager": "SV005",
+# Inicializar y ejecutar el servicio
+inventory_service = Service(service_name="generate_excel", host="localhost", port=5001)
+inventory_service.run_service(handle_inventory_request)
 
 # Función para obtener la conexión a la base de datos
 def get_db_connection():
@@ -87,15 +185,3 @@ def generate_excel_report(sales_df, inventory_df, filename='sales_report.xlsx'):
 
     print(f"Reporte generado: {full_path}")
 
-# Función para manejar la solicitud de generación de reporte
-def generate_report(data: str) -> str:
-    data = json.loads(data)
-    sales_df = get_sales_data()  # Obtén los datos de ventas desde PostgreSQL
-    inventory_df = get_inventory_data()  # Obtén los datos de inventario desde PostgreSQL
-    generate_excel_report(sales_df, inventory_df)  # Genera el reporte en Excel
-    response = {
-        "message": "Reporte generado exitosamente."
-    }
-    return str(json.dumps(response))
-
-service.run_service(generate_report)
