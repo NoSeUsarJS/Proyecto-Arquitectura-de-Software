@@ -8,7 +8,7 @@ import client_personal
 import client_pedidos
 import client_generar_pedido
 import client_venta
-
+import client_generate_excel
 def login_client():
     server_address = ('localhost', 5001)
     print('Connecting to {} port {}'.format(*server_address))
@@ -68,7 +68,7 @@ def main():
                 elif(valor == "4"):
                     client_meal.main()
                 elif(valor == "5"):
-                    print("Proximamente") #arreglar client_excel y acoplarlo al servicio 
+                    client_generate_excel.main() #arreglar client_excel y acoplarlo al servicio 
                 elif(valor == "6"):
                     print("Proximamente") #arreglar client_dashboard y acoplarlo al servicio 
                 elif(valor == "7"):
