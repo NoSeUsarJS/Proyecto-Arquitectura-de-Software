@@ -81,6 +81,8 @@ def handle_inventory_request(data: str) -> str:
 
             lista.append(f" id: {id} - nombre: {nombre} - tiempo medio: {tiempo} - precio: {precio} - descripcion: {descripcion}")
         response = json.dumps(lista)
+    
+    
     else:
         response = "Acción no válida."
     

@@ -148,9 +148,9 @@ class DatabaseServer:
         except Exception as e:
             print(f"Error al crear las tablas: {e}")
 
-server = DatabaseServer(host='localhost', port='5432', dbname='mydatabase', user='myuser', password='mypassword')
-server.create_connection()
-server.create_tables()
+#server = DatabaseServer(host='localhost', port='5432', dbname='mydatabase', user='myuser', password='mypassword')
+#server.create_connection()
+#server.create_tables()
 
 #Probar Query
 #server.query("") #Igual se tendria q ver en el dockerfile de la base de datos lo q se haga, si es select, con print se ve todo

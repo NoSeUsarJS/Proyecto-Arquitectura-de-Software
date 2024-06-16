@@ -55,6 +55,7 @@ def main():
                 print("6. Ver Dashboard")
                 print("7. Gestor de Ventas")
                 print("8. Gestor de comidas")
+                #print("9. Linkear comida e ingrediente") 
                 print("9. Cerrar sesion")
 
                 valor = input("Seleccione Cliente: ")
@@ -95,7 +96,7 @@ def main():
                 elif(valor == "3"):
                     client_venta.cerrar_cuenta() #crear todo?
                 elif(valor == "4"):
-                    client_personal.editpass() #Crear en servicio
+                    client_personal.editpass() 
                 elif(valor == "5"):
                     break
                 else:

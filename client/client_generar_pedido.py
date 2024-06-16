@@ -10,7 +10,7 @@ def add_client():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(server_address)
     try:
-        mesa = input("Ingrese ingrediente: ")
+        mesa = input("Ingrese numero de la mesa: ")
         id = input("Ingrese su id Garzon: ")
         data = {"action": "1", "mesa": mesa, "id": id}
 
@@ -22,7 +22,7 @@ def add_client():
                 print("That's not a valid number. Please enter an integer.")
         lista = []
         for i in range(pedidos):
-            platillo = input("Ingrese nombre del platillo: ")
+            platillo = input("Ingrese id del platillo: ")
             comentario = input("Algun comentario (opcional): ")
             data2 = {"platillo": platillo, "comentario": comentario}
             lista.append(data2)

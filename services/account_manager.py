@@ -90,6 +90,12 @@ def handle_inventory_request(data: str) -> str:
 
             lista.append(f" id: {id} - nombre: {nombre} - rut: {rut} - rol: {rol} - password: {password}")
         response = json.dumps(lista)
+    elif action == "5":
+        rut = data.get('rut')
+        password = data.get('password')
+        query = f"UPDATE persona SET password = {password} WHERE rut = '{rut}'"
+        Enviar(query)
+        response = "Contraseña actualizada"
     else:
         response = "Acción no válida."
     
