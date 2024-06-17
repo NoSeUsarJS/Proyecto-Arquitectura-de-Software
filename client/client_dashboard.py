@@ -1,39 +1,20 @@
 import socket
 from common.soa_formatter import soa_formatter
 import json
-import matplotlib.pyplot as plt
-from io import BytesIO
-import base64
 
-# Función para mostrar la gráfica de ventas
-def display_sales_chart(image_base64):
-    if image_base64:
-        image_data = base64.b64decode(image_base64)
-        plt.figure(figsize=(10, 6))
-        img = plt.imread(BytesIO(image_data))
-        plt.imshow(img)
-        plt.axis('off')
-        plt.show()
-    else:
-        print("No sales data available for today.")
+def request_data(table):
+    # Create a TCP/IP socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Create a TCP/IP socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # Define the server address and port
+    server_address = ('localhost', 5001)  # Cambia esto al puerto del bus de servicios
+    print('Connecting to {} port {}'.format(*server_address))
 
-# Define the server address and port
-server_address = ('localhost', 5001)  # Cambia esto al puerto del bus de servicios
-print('Connecting to {} port {}'.format(*server_address))
+    # Connect to the server
+    sock.connect(server_address)
 
-# Connect to the server
-sock.connect(server_address)
-
-try:
-    while True:
-        user_input = input('Enviar solicitud para obtener datos del dashboard? y/n: ')
-        if user_input != 'y':
-            break
-        
-        data = {"request": "get_dashboard_data"}
+    try:
+        data = {"request": "get_dashboard_data", "table": table}
         message = soa_formatter("dashboard", json.dumps(data))
         print('Sending {!r}'.format(message))
         sock.sendall(message)
@@ -55,28 +36,69 @@ try:
         if data_str.startswith("SV003OK"):
             data_str = data_str[7:]
 
-        response = json.loads(data_str)
+        if not data_str:
+            print("Empty response received.")
+            return
+
+        try:
+            response = json.loads(data_str)
+        except json.JSONDecodeError:
+            print("Failed to decode JSON response.")
+            return
+
         print('Received data: {}'.format(response))
 
-        # Mostrar gráfica de ventas del día
-        if 'sales_chart' in response:
-            display_sales_chart(response['sales_chart'])
+        # Mostrar datos de la tabla seleccionada
+        if table == 'platillo' and 'platillo_data' in response:
+            print("\nDatos de Platillo:")
+            for item in response['platillo_data']:
+                print(item)
 
-        # Mostrar porcentaje de productos vendidos
-        if 'product_percentage' in response:
-            print("\nPorcentaje de Productos Vendidos:")
-            for product, percentage in response['product_percentage'].items():
-                print(f"{product}: {percentage:.2f}%")
-
-        # Mostrar inventario
-        if 'inventory_data' in response:
+        elif table == 'ingredientes' and 'inventory_data' in response:
             print("\nInventario de Productos:")
-            for product, stock in response['inventory_data'].items():
-                print(f"{product}: {stock} en stock")
+            for item in response['inventory_data']:
+                print(item)
+
+        elif table == 'persona' and 'persona_data' in response:
+            print("\nDatos de Persona:")
+            for item in response['persona_data']:
+                print(item)
+
+        elif table == 'venta' and 'venta_data' in response:
+            print("\nDatos de Venta:")
+            for item in response['venta_data']:
+                print(item)
 
         if 'error' in response:
             print(f"Error: {response['error']}")
 
-finally:
-    print('Closing socket')
-    sock.close()
+    finally:
+        print('Closing socket')
+        sock.close()
+
+def main():
+    while True:
+        print("\nMain Menu:")
+        print("1. Obtener datos de Platillo")
+        print("2. Obtener datos de Inventario")
+        print("3. Obtener datos de Persona")
+        print("4. Obtener datos de Venta")
+        print("5. Exit")
+
+        choice = input("Select an option: ")
+
+        if choice == "1":
+            request_data('platillo')
+        elif choice == "2":
+            request_data('ingredientes')
+        elif choice == "3":
+            request_data('persona')
+        elif choice == "4":
+            request_data('venta')
+        elif choice == "5":
+            break
+        else:
+            print("Invalid option, please try again.")
+
+if __name__ == "__main__":
+    main()
