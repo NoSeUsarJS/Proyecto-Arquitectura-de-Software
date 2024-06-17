@@ -24,6 +24,8 @@ def add_client():
         for _ in range(pedidos):
             platillo = input("Ingrese id del platillo: ")
             comentario = input("Algun comentario (opcional): ")
+            if not comentario:
+                comentario = "NO APLICA"
             data2 = {"platillo": platillo, "comentario": comentario}
             lista.append(data2)
         
