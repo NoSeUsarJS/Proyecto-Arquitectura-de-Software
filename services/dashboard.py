@@ -1,4 +1,3 @@
-from common.services import Service
 import pandas as pd
 import psycopg2
 import json
@@ -27,7 +26,9 @@ def Enviar(query):
         
         print("Received raw data:", data)
         try:
-            return data.decode()[7:]  # Aquí asumes que hay un prefijo de 7 caracteres que no es parte del JSON
+            decoded_data = data.decode()[7:]
+            print("Decoded data:", decoded_data)
+            return json.loads(decoded_data)
         except json.JSONDecodeError:
             print("Error decoding JSON response.")
             return None
@@ -36,46 +37,31 @@ def Enviar(query):
         print('Closing socket')
         sock.close()
 
-# Funciones para obtener datos desde PostgreSQL
-def get_platillo_data():
+# Función para obtener datos desde PostgreSQL
+def get_data(query):
     try:
-        conn = Enviar("SELECT * FROM platillo")
-        df = pd.read_sql_query("SELECT * FROM platillo", conn)
-        conn.close()
-        return df
+        response = Enviar(query)
+        if response and 'data' in response:
+            df = pd.DataFrame(response['data'])
+            return df
+        else:
+            print("No data received or invalid response format.")
+            return pd.DataFrame()
     except Exception as e:
-        print(f"Error getting platillo data: {e}")
+        print(f"Error getting data: {e}")
         return pd.DataFrame()
+
+def get_platillo_data():
+    return get_data("SELECT * FROM platillo")
 
 def get_inventory_data():
-    try:
-        conn = Enviar("SELECT * FROM ingredientes")
-        df = pd.read_sql_query("SELECT * FROM ingredientes", conn)
-        conn.close()
-        return df
-    except Exception as e:
-        print(f"Error getting inventory data: {e}")
-        return pd.DataFrame()
+    return get_data("SELECT * FROM ingredientes")
 
 def get_persona_data():
-    try:
-        conn = Enviar("SELECT * FROM persona")
-        df = pd.read_sql_query("SELECT * FROM persona", conn)
-        conn.close()
-        return df
-    except Exception as e:
-        print(f"Error getting persona data: {e}")
-        return pd.DataFrame()
+    return get_data("SELECT * FROM persona")
 
 def get_venta_data():
-    try:
-        conn = Enviar("SELECT * FROM venta")
-        df = pd.read_sql_query("SELECT * FROM venta", conn)
-        conn.close()
-        return df
-    except Exception as e:
-        print(f"Error getting venta data: {e}")
-        return pd.DataFrame()
+    return get_data("SELECT * FROM venta")
 
 # Función para manejar la solicitud de datos del dashboard
 def handle_dashboard_request(data: str) -> str:
