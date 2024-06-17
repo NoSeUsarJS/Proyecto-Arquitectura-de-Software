@@ -110,7 +110,7 @@ class DatabaseServer:
             CREATE TABLE IF NOT EXISTS pedido (
                 id_Pedido SERIAL PRIMARY KEY,
                 Mesa INT REFERENCES Mesa(Mesa),
-                Hora TIME NOT NULL,
+                Hora VARCHAR(255) NOT NULL,
                 id_persona INT REFERENCES persona(id)
             )
             """
