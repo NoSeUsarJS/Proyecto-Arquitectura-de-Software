@@ -1,8 +1,4 @@
 import pandas as pd
-from datetime import datetime
-import os
-import psycopg2
-
 import json
 import socket
 from common.services import Service

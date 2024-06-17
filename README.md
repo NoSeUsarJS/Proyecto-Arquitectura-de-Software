@@ -5,6 +5,7 @@ docker-compose up -d
 
 Para que funcione la base de datos (docker postgres)
 pip install psycopg2
+pip install openpyxl
 
 para ver el bash de la bd:
 docker exec -it postgres_db bash
