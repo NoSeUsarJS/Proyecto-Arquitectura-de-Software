@@ -11,8 +11,8 @@ def add_client():
     sock.connect(server_address)
     try:
         mesa = input("Ingrese numero de la mesa: ")
-        id = input("Ingrese su id Garzon: ")
-        data = {"action": "1", "mesa": mesa, "id": id}
+        rut = input("Ingrese su RUT Garzon: ")
+        data = {"action": "1", "mesa": mesa, "rut": rut}
 
         while True:
             try:
@@ -21,15 +21,17 @@ def add_client():
             except ValueError:
                 print("That's not a valid number. Please enter an integer.")
         lista = []
-        for i in range(pedidos):
+        for _ in range(pedidos):
             platillo = input("Ingrese id del platillo: ")
             comentario = input("Algun comentario (opcional): ")
             data2 = {"platillo": platillo, "comentario": comentario}
             lista.append(data2)
+        
+        data["platillos"] = lista
         # Transformar los datos para que se envie 1 al servicio
 
         #No tocar
-        message = soa_formatter("finish_order_manager", json.dumps(data))
+        message = soa_formatter("create_order_manager", json.dumps(data))
         sock.sendall(message)
 
         amount_received = 0
@@ -43,6 +45,9 @@ def add_client():
         
         print("Received raw data:", data)
         # Agregar manejo de errores
+        if data.decode()[5:].startswith("NK"):
+            print("Error al crear orden")
+            return False
         
         return True
                     
@@ -60,7 +65,7 @@ def watch_client():
         data = {"action": "2"}
         
         #No tocar
-        message = soa_formatter("finish_order_manager", json.dumps(data))
+        message = soa_formatter("create_order_manager", json.dumps(data))
         sock.sendall(message)
 
         amount_received = 0
@@ -74,10 +79,9 @@ def watch_client():
         
         print("Received raw data:", data)
         # Agregar manejo de errores
-        data1 = f"{json.loads(data.decode()[7:])}" 
+        list_of_strings = json.loads(data.decode()[7:])
 
-        list_of_strings = ast.literal_eval(data1)
-        print(list_of_strings)
+        list_of_strings = list_of_strings["pedidos"]
         return True
                     
     finally:
