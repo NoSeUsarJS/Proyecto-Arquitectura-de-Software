@@ -10,8 +10,8 @@ def cerrar_cuenta():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(server_address)
     try:
-        id = input("Ingrese id del pedido: ")
-        data = {"action": "1", "id": id}
+        id_pedido = input("Ingrese id del pedido: ")
+        data = {"action": "1", "id": id_pedido}
         
         #No tocar
         message = soa_formatter("finish_order_manager", json.dumps(data))
@@ -59,9 +59,9 @@ def watch_client():
         
         print("Received raw data:", data)
         # Agregar manejo de errores
-        data1 = f"{json.loads(data.decode()[7:])}" 
+        data1 = json.loads(data.decode()[7:])
 
-        list_of_strings = ast.literal_eval(data1)
+        list_of_strings = data1["ventas"]
         print(list_of_strings)
         return True
                     
