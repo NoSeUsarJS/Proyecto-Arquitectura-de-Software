@@ -131,7 +131,7 @@ class DatabaseServer:
             create_Venta_table = """
             CREATE TABLE IF NOT EXISTS Venta (
                 id_Venta SERIAL PRIMARY KEY,
-                id_pedido INT REFERENCES pedido(id_Pedido),
+                id_pedido INT,
                 Precio_Total INT 
             )
             """
