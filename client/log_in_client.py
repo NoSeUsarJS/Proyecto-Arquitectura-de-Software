@@ -5,10 +5,11 @@ import client_table
 import client_meal
 import client_inventory
 import client_personal
-import client_pedidos
 import client_generar_pedido
 import client_venta
 import client_generate_excel
+import client_dashboard
+
 def login_client():
     server_address = ('localhost', 5001)
     print('Connecting to {} port {}'.format(*server_address))
@@ -54,7 +55,7 @@ def main():
                 print("5. Generar Excel")
                 print("6. Ver Dashboard")
                 print("7. Gestor de Ventas")
-                print("8. Gestor de comidas")
+                #print("8. Ver de comidas")
                 #print("9. Linkear comida e ingrediente") 
                 print("9. Cerrar sesion")
 
@@ -70,11 +71,12 @@ def main():
                 elif(valor == "5"):
                     client_generate_excel.main() #arreglar client_excel y acoplarlo al servicio 
                 elif(valor == "6"):
-                    print("Proximamente") #arreglar client_dashboard y acoplarlo al servicio 
+                    client_dashboard.main()
+                    #print("Proximamente") #arreglar client_dashboard y acoplarlo al servicio 
                 elif(valor == "7"):
                     client_venta.main()
-                elif(valor == "8"):
-                    client_pedidos.main()
+                #elif(valor == "8"):
+                    
                 elif(valor == "9"):
                     break
                 else:

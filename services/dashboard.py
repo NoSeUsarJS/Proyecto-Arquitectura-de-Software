@@ -37,57 +37,23 @@ def Enviar(query):
         print('Closing socket')
         sock.close()
 
-# Función para obtener datos desde PostgreSQL
-def get_data(query):
-    try:
-        response = Enviar(query)
-        if response and 'data' in response:
-            df = pd.DataFrame(response['data'])
-            return df
-        else:
-            print("No data received or invalid response format.")
-            return pd.DataFrame()
-    except Exception as e:
-        print(f"Error getting data: {e}")
-        return pd.DataFrame()
-
-def get_platillo_data():
-    return get_data("SELECT * FROM platillo")
-
-def get_inventory_data():
-    return get_data("SELECT * FROM ingredientes")
-
-def get_persona_data():
-    return get_data("SELECT * FROM persona")
-
-def get_venta_data():
-    return get_data("SELECT * FROM venta")
-
 # Función para manejar la solicitud de datos del dashboard
 def handle_dashboard_request(data: str) -> str:
     data = json.loads(data)
-    response = {}
-    table = data.get("table")
-    
-    try:
-        if table == 'platillo':
-            platillo_data = get_platillo_data().to_dict()
-            response['platillo_data'] = platillo_data
-        elif table == 'ingredientes':
-            inventory_data = get_inventory_data().to_dict()
-            response['inventory_data'] = inventory_data
-        elif table == 'persona':
-            persona_data = get_persona_data().to_dict()
-            response['persona_data'] = persona_data
-        elif table == 'venta':
-            venta_data = get_venta_data().to_dict()
-            response['venta_data'] = venta_data
-        else:
-            response['error'] = "Invalid table selected."
-    except Exception as e:
-        response['error'] = f"An error occurred: {e}"
+    action = data.get('action')
 
-    return json.dumps(response)
+    if action == "1":
+        query = f"SELECT precio_total,fecha_insercion from venta"
+        response = Enviar(query)
+        response = json.dumps(response)
+    
+    
+    else:
+        response = "Acción no válida."
+    
+    print("Sending response:", response) 
+    
+    return response 
 
 # Inicializar y ejecutar el servicio
 dashboard_service = Service(service_name="dashboard", host="localhost", port=5001)
