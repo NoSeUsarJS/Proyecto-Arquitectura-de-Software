@@ -45,7 +45,7 @@ def handle_inventory_request(data: str) -> str:
         nombre = data.get('nombre')
         cantidad = data.get('cantidad')
         print("Agregando ingredientes...")
-        query = f"INSERT INTO ingredientes ( nombre, cantidad_ingredientes) VALUES ({nombre},{cantidad})"
+        query = f"INSERT INTO ingredientes ( nombre, cantidad_ingredientes) VALUES ('{nombre}',{cantidad})"
         Enviar(query)
         response = "Ingrediente añadido"
 
