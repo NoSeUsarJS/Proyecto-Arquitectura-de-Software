@@ -31,14 +31,12 @@ def watch_client():
         #data1 = f"{json.loads(data.decode()[7:])}" 
         #print(data1[0][1])
         SumP = 0
-        Tiempo_actual = '0'
+        Tiempo_actual = ''
         y = []
         x = []
 
         for i in range(len(data1)):
-            Precio = data1[i][0]
-            #print(Precio)
-            SumP += Precio
+            
             
             Tiempo = data1[i][1]
             #print(Tiempo)
@@ -46,11 +44,30 @@ def watch_client():
             start_index = timestamp_str.find("'") + 1
             end_index = timestamp_str.find("T")
             fecha = timestamp_str[start_index:end_index]
-            print(fecha)
+            #print(fecha)
+            Precio = data1[i][0]
+            if Tiempo_actual == '':
+                Tiempo_actual = fecha
+                SumP += Precio
+                #print("paso por aqui")
+            elif Tiempo_actual != fecha:
+                x.append(Tiempo_actual)
+                y.append(SumP)
+                SumP = 0
+                SumP += Precio
+                Tiempo_actual = fecha
+            elif i == len(data1)-1:
+                SumP += Precio
+                x.append(Tiempo_actual)
+                y.append(SumP)
 
-            x.append(fecha)         
-            y.append(Precio)  
-        
+            else:
+                SumP += Precio
+            #print(fecha)
+            #print(SumP)
+            #print(i)
+        #print(x)
+        #print(y)
         plt.bar(x, y)
         plt.show()
         #list_of_strings = ast.literal_eval(data1)
